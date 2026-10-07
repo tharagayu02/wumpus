@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WUMPUS WORLD: HUNT FOR THE TREASURE</title>
+    <meta name="description"
+        content="Enter the cave. Outsmart the Wumpus. Survive the darkness. A modern AAA browser strategy and adventure game featuring intelligent AI reasoning.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Background Canvas for Particles, Embers, and Torches -->
+    <canvas id="ambientCanvas"></canvas>
+
+    <div id="app-viewport">
+        <!-- ==================== 1. HOME / LANDING SCREEN ==================== -->
+        <section id="screen-home" class="game-screen active">
+            <header class="home-header">
+                <span class="game-title-badge">TACTICAL DUNGEON ADVENTURE</span>
+                <h1 class="main-title">WUMPUS WORLD</h1>
+                <p class="main-subtitle">"Enter the cave. Outsmart the Wumpus. Survive the darkness."</p>
+            </header>
+
+            <nav class="home-menu-nav">
+                <button id="btn-play-game" class="btn-primary-rpg">
+                    <span>⚔️ ENTER THE CAVE</span>
+                </button>
+                <button id="btn-how-to-play" class="btn-secondary-rpg">
+                    <span>📜 HOW TO PLAY</span>
+                </button>
+                <button id="btn-leaderboard" class="btn-secondary-rpg">
+                    <span>🏆 HALL OF FAME</span>
+                </button>
+                <button id="btn-achievements" class="btn-secondary-rpg">
+                    <span>🎖️ ACHIEVEMENTS</span>
+                </button>
+                <button id="btn-settings" class="btn-secondary-rpg">
+                    <span>⚙️ SETTINGS</span>
+                </button>
+                <button id="btn-credits" class="btn-secondary-rpg">
+                    <span>👥 CREDITS</span>
+                </button>
+            </nav>
+
+            <footer class="home-footer-bar">
+                <span>Wumpus World Adventure v1.0 • AAA Strategy Edition</span>
+                <button id="btn-mute-toggle" class="audio-quick-btn" title="Toggle Sound">
+                    <span class="audio-icon">🔊</span> AUDIO
+                </button>
+            </footer>
+        </section>
+
+        <!-- ==================== 2. GAME MODE SELECTION ==================== -->
+        <section id="screen-mode" class="game-screen">
+            <div class="page-container">
+                <header class="page-header">
+                    <h2>SELECT EXPEDITION MODE</h2>
+                    <p>Choose how you wish to face the subterranean darkness</p>
+                </header>
+
+                <div class="cards-grid-4">
+                    <!-- Mode 1: Single Player -->
+                    <div class="selection-card mode-card selected" data-mode="SINGLE">
+                        <div class="card-icon">🗡️</div>
+                        <h3 class="card-title">SINGLE PLAYER</h3>
+                        <p class="card-desc">The Lone Explorer. Venture alone into the perilous cavern, locate the
+                            golden treasure, slay the beast, and return alive.</p>
+                        <span class="card-badge">Classic Challenge</span>
+                    </div>
+
+                    <!-- Mode 2: Player vs AI -->
+                    <div class="selection-card mode-card" data-mode="VS_AI">
+                        <div class="card-icon">⚔️</div>
+                        <h3 class="card-title">PLAYER VS AI</h3>
+                        <p class="card-desc">The Cave Rivalry. Race against an intelligent autonomous agent making
+                            real-time knowledge-based logical inferences.</p>
+                        <span class="card-badge">Competitive</span>
+                    </div>
+
+                    <!-- Mode 3: Player vs Friend -->
+                    <div class="selection-card mode-card" data-mode="VS_FRIEND">
+                        <div class="card-icon">👥</div>
+                        <h3 class="card-title">PLAYER VS FRIEND</h3>
+                        <p class="card-desc">Local 2-Player Duel. Player 1 (WASD) and Player 2 (Arrow keys) compete on
+                            the same board in turn-based combat.</p>
+                        <span class="card-badge">Local Multiplayer</span>
+                    </div>
+
+                    <!-- Mode 4: AI vs AI -->
+                    <div class="selection-card mode-card" data-mode="AI_VS_AI">
+                        <div class="card-icon">🤖</div>
+                        <h3 class="card-title">AI VS AI SIMULATION</h3>
+                        <p class="card-desc">The Simulation Laboratory. Watch two AI agents duel autonomously with full
+                            access to their internal belief networks.</p>
+                        <span class="card-badge">Observer Lab</span>
+                    </div>
+                </div>
+
+                <div class="page-actions-bar">
+                    <button id="btn-mode-back" class="btn-secondary-rpg">‹ BACK</button>
+                    <button id="btn-mode-next" class="btn-primary-rpg">NEXT: DIFFICULTY ›</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 3. DIFFICULTY & DUNGEON CONFIG ==================== -->
+        <section id="screen-difficulty" class="game-screen">
+            <div class="page-container">
+                <header class="page-header">
+                    <h2>SELECT YOUR LEVEL</h2>
+                    <p>Clear a cavern (escape alive with the gold) to unlock the next one</p>
+                </header>
+
+                <div id="level-grid" class="cards-grid-4 level-grid">
+                    <!-- Level cards are rendered by GameUI.renderLevelSelect() -->
+                </div>
+                <p id="level-progress-text" class="level-progress-text"></p>
+
+                <!-- AI Intelligence Setting (Shown when AI is involved) -->
+                <div id="ai-difficulty-group" class="subgroup-panel" style="display: none;">
+                    <h4 class="subgroup-title">OPPONENT AI INTELLECT</h4>
+                    <div class="ai-diff-button-group">
+                        <button class="ai-diff-btn" data-ai-diff="easy">Easy (Novice)</button>
+                        <button class="ai-diff-btn active" data-ai-diff="normal">Normal (Logical)</button>
+                        <button class="ai-diff-btn" data-ai-diff="hard">Hard (Probabilistic)</button>
+                        <button class="ai-diff-btn" data-ai-diff="master">Master (Optimal A*)</button>
+                    </div>
+                </div>
+
+                <div class="page-actions-bar">
+                    <button id="btn-diff-back" class="btn-secondary-rpg">‹ BACK</button>
+                    <button id="btn-start-expedition" class="btn-primary-rpg">⚔️ DESCEND INTO CAVE</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 4. ACTIVE GAME SCREEN ==================== -->
+        <section id="screen-game" class="game-screen">
+            <!-- Top HUD Bar -->
+            <header class="game-top-hud">
+                <div class="hud-players-cluster">
+                    <!-- Player 1 Status -->
+                    <div id="hud-player1-card" class="hud-player-card active-turn">
+                        <img src="assets/hero_knight.jpg" class="hud-player-avatar" alt="Player 1" />
+                        <div class="hud-player-stats">
+                            <span id="hud-p1-name" class="hud-player-name">Player 1</span>
+                            <div class="hud-stats-row">
+                                <span class="hud-stat-item">HP: <strong id="hud-p1-health">❤️❤️❤️</strong></span>
+                                <span class="hud-stat-item">🏹 <strong id="hud-p1-arrows">3</strong></span>
+                                <span class="hud-stat-item">💰 <strong id="hud-p1-gold">NO</strong></span>
+                                <span class="hud-stat-item">⭐ <strong id="hud-p1-score">0</strong></span>
+                                <span class="hud-stat-item">📍 <strong id="hud-p1-pos">(0, 0)</strong></span>
+                                <span id="hud-p1-perk" class="hud-stat-item" style="display: none;"
+                                    title="Active Perk">⚡ <strong id="hud-p1-perk-text"></strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Player 2 / AI Status (Conditional) -->
+                    <div id="hud-player2-card" class="hud-player-card" style="display: none;">
+                        <img src="assets/hero_ranger.jpg" class="hud-player-avatar" alt="Player 2" />
+                        <div class="hud-player-stats">
+                            <span id="hud-p2-name" class="hud-player-name">Opponent</span>
+                            <div class="hud-stats-row">
+                                <span class="hud-stat-item">HP: <strong id="hud-p2-health">❤️❤️❤️</strong></span>
+                                <span class="hud-stat-item">🏹 <strong id="hud-p2-arrows">3</strong></span>
+                                <span class="hud-stat-item">💰 <strong id="hud-p2-gold">NO</strong></span>
+                                <span class="hud-stat-item">⭐ <strong id="hud-p2-score">0</strong></span>
+                                <span class="hud-stat-item">📍 <strong id="hud-p2-pos">(0, 0)</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hud-center-cluster">
+                    <span id="hud-turn-badge" class="turn-indicator-badge badge-p1">Player 1's Turn</span>
+                    <div class="hud-timer-badge">
+                        <span>⏱️</span> <span id="hud-timer">00:00</span>
+                    </div>
+                </div>
+
+                <div class="hud-right-cluster">
+                    <button id="hud-mute-btn" class="hud-icon-btn" title="Toggle Mute">
+                        <span class="audio-icon">🔊</span>
+                    </button>
+                    <button id="hud-pause-btn" class="hud-icon-btn" title="Pause Game (ESC)">
+                        <span>⏸️</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Environmental Clues Bar -->
+            <div class="percept-clues-bar">
+                <div id="percept-stench" class="percept-pill" title="Stench indicates Wumpus in adjacent chamber">
+                    <span>☣️</span> <span>STENCH</span>
+                </div>
+                <div id="percept-breeze" class="percept-pill" title="Breeze indicates Pit in adjacent chamber">
+                    <span>💨</span> <span>BREEZE</span>
+                </div>
+                <div id="percept-glitter" class="percept-pill"
+                    title="Glitter indicates Golden Treasure in this chamber">
+                    <span>✨</span> <span>GLITTER</span>
+                </div>
+                <div id="percept-scream" class="percept-pill" title="Scream echoes when a Wumpus dies">
+                    <span>😱</span> <span>SCREAM</span>
+                </div>
+            </div>
+
+            <!-- Main Playing Field -->
+            <div class="game-main-field">
+                <!-- Dungeon Grid Viewport -->
+                <div class="dungeon-viewport">
+                    <div class="viewport-controls-toolbar">
+                        <button id="btn-zoom-out" class="view-ctrl-btn" title="Zoom Out Grid">−</button>
+                        <span id="zoom-level-text" class="zoom-level-badge">100%</span>
+                        <button id="btn-zoom-in" class="view-ctrl-btn" title="Zoom In Grid">+</button>
+                        <button id="btn-zoom-fit" class="view-ctrl-btn" title="Fit to Viewport">FIT</button>
+                        <button id="btn-toggle-coords" class="view-ctrl-btn" title="Toggle Cell Coordinates">XY</button>
+                    </div>
+                    <div class="dungeon-grid-container">
+                        <div id="dungeon-grid" class="dungeon-grid">
+                            <!-- Dynamic cells injected by GameUI.renderBoard() -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebars: Minimap, AI Panel, Combat Log -->
+                <aside class="game-sidebar">
+                    <!-- Interactive Minimap -->
+                    <div id="minimap-container" class="side-panel minimap-panel">
+                        <div class="panel-header">
+                            <span class="panel-title">🗺️ RADAR MINIMAP</span>
+                            <button id="btn-toggle-minimap" class="hud-icon-btn"
+                                style="width:28px;height:28px;font-size:0.8rem;" title="Expand/Collapse">⤢</button>
+                        </div>
+                        <canvas id="minimap-radar" width="180" height="180"></canvas>
+                    </div>
+
+                    <!-- AI Knowledge & Reasoning Panel (Shown in AI modes) -->
+                    <div id="ai-reasoning-panel" class="side-panel ai-panel" style="display: none;">
+                        <div class="panel-header">
+                            <span class="panel-title">🧠 AI BELIEF NETWORK</span>
+                        </div>
+                        <div class="ai-stat-row">
+                            <span class="ai-label">Current Node:</span>
+                            <span id="ai-current-pos" class="ai-value">(0, 0)</span>
+                        </div>
+                        <div class="ai-stat-row">
+                            <span class="ai-label">Percepts:</span>
+                            <span id="ai-percepts-readout" class="ai-value">NONE</span>
+                        </div>
+                        <div class="ai-stat-row">
+                            <span class="ai-label">Suspected Wumpus:</span>
+                            <span id="ai-possible-wumpus" class="ai-value" style="color:var(--danger-red)">None</span>
+                        </div>
+                        <div class="ai-stat-row">
+                            <span class="ai-label">Suspected Pits:</span>
+                            <span id="ai-possible-pits" class="ai-value" style="color:var(--breeze-cyan)">None</span>
+                        </div>
+                        <div>
+                            <div class="ai-stat-row">
+                                <span class="ai-label">Calculated Risk:</span>
+                                <span id="ai-risk-pct" class="ai-value">0%</span>
+                            </div>
+                            <div class="ai-meter-container">
+                                <div id="ai-risk-meter" class="ai-meter-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="ai-decision-box">
+                            <span class="ai-label">Next Action Decision:</span>
+                            <div id="ai-decision-text" class="ai-decision-display">ANALYZING...</div>
+                            <div class="ai-stat-row" style="margin-top:0.3rem;">
+                                <span class="ai-label">Confidence:</span>
+                                <span id="ai-conf-pct" class="ai-value">95%</span>
+                            </div>
+                            <div class="ai-meter-container">
+                                <div id="ai-confidence-bar" class="ai-confidence-fill" style="width: 95%;"></div>
+                            </div>
+                        </div>
+                        <div class="panel-header" style="margin-top:0.4rem;">
+                            <span class="panel-title" style="font-size:0.85rem;">📝 REASONING STREAM</span>
+                        </div>
+                        <div id="ai-thought-log" class="ai-thought-stream">
+                            <div class="thought-entry">
+                                <span class="thought-msg">Initializing propositional belief base...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Simulation Controls (in AI vs AI mode) -->
+                    <div id="sim-controls-panel" class="side-panel sim-controls-panel" style="display: none;">
+                        <div class="panel-header">
+                            <span class="panel-title">⚡ SIMULATION CONTROLS</span>
+                        </div>
+                        <div class="sim-btn-group">
+                            <button id="btn-sim-step" class="sim-action-btn">▶ Step</button>
+                            <button class="sim-speed-btn active" data-speed="1000">1x</button>
+                            <button class="sim-speed-btn" data-speed="500">2x</button>
+                            <button class="sim-speed-btn" data-speed="200">5x</button>
+                        </div>
+                    </div>
+
+                    <!-- Combat & Discovery Event Log -->
+                    <div class="side-panel combat-log-panel">
+                        <div class="panel-header">
+                            <span class="panel-title">📜 EXPEDITION LOG</span>
+                        </div>
+                        <div id="combat-log-content" class="combat-log-content">
+                            <!-- Dynamic log entries injected here -->
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Virtual On-Screen Mobile D-Pad & Controls Bar -->
+            <footer class="mobile-controls-bar">
+                <div class="virtual-dpad">
+                    <button id="btn-dpad-up" class="dpad-btn dpad-up" aria-label="Move Up">▲</button>
+                    <button id="btn-dpad-left" class="dpad-btn dpad-left" aria-label="Move Left">◀</button>
+                    <button id="btn-dpad-down" class="dpad-btn dpad-down" aria-label="Move Down">▼</button>
+                    <button id="btn-dpad-right" class="dpad-btn dpad-right" aria-label="Move Right">▶</button>
+                </div>
+
+                <div class="virtual-action-buttons">
+                    <button id="btn-act-shoot" class="action-touch-btn" title="Aim & Shoot Arrow (Space)">
+                        <span>🏹</span> <span>SHOOT</span>
+                    </button>
+                    <button id="btn-act-grab" class="action-touch-btn" title="Grab Golden Treasure (E)">
+                        <span>💰</span> <span>GRAB GOLD</span>
+                    </button>
+                    <button id="btn-act-escape" class="action-touch-btn" title="Escape Cavern at Entrance (Enter)">
+                        <span>🪜</span> <span>ESCAPE</span>
+                    </button>
+                </div>
+            </footer>
+        </section>
+
+        <!-- ==================== 5. HOW TO PLAY & INTERACTIVE TUTORIAL ==================== -->
+        <section id="screen-how-to-play" class="game-screen">
+            <div class="page-container">
+                <header class="page-header">
+                    <h2>THE ADVENTURER'S SURVIVAL GUIDE</h2>
+                    <p>Master the laws of Wumpus World and the art of logical deduction</p>
+                </header>
+
+                <div class="tutorial-layout">
+                    <div class="tutorial-rules-grid">
+                        <div class="rule-card">
+                            <h4>💨 The Breeze & Pits</h4>
+                            <p>Deep, bottomless pits are scattered throughout the cavern. Falling into a pit is
+                                instantly fatal (-1000 pts). When standing in any chamber orthogonally adjacent to a
+                                pit, you will feel a <strong>BREEZE</strong>.</p>
+                        </div>
+                        <div class="rule-card">
+                            <h4>☣️ The Stench & The Wumpus</h4>
+                            <p>A monstrous, flesh-eating beast known as the Wumpus lurks in the shadows. Entering its
+                                chamber means gruesome death (-1500 pts). When adjacent to the beast, you will detect a
+                                putrid <strong>STENCH</strong>.</p>
+                        </div>
+                        <div class="rule-card">
+                            <h4>✨ Golden Treasure</h4>
+                            <p>Ancient caches of gold lie hidden in the cave. When entering the chamber containing gold,
+                                you will perceive a brilliant <strong>GLITTER</strong>. Press <strong>E</strong> or tap
+                                Grab Gold to seize it (+1000 pts)!</p>
+                        </div>
+                        <div class="rule-card">
+                            <h4>🏹 The Bow & Arrow</h4>
+                            <p>You carry a limited quiver of magical arrows. Press <strong>Space</strong> to aim and
+                                select a direction. An arrow flies in a straight line until hitting a wall or slaying
+                                the Wumpus (+500 pts)!</p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Sandbox Demo Board -->
+                    <div class="interactive-demo-container">
+                        <h3 class="panel-title"
+                            style="justify-content: center; font-size:1.2rem; margin-bottom: 0.5rem;">
+                            🔬 INTERACTIVE DEDUCTION SANDBOX
+                        </h3>
+                        <p
+                            style="font-size: 0.95rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 1rem;">
+                            Click each sample chamber below to test audio cues and see how environmental evidence
+                            informs tactical decisions!
+                        </p>
+                        <div id="tutorial-demo-grid" class="tutorial-demo-grid">
+                            <!-- Injected by GameUI.setupInteractiveTutorial() -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-actions-bar">
+                    <button class="btn-secondary-rpg btn-back-home">‹ RETURN TO MENU</button>
+                    <button class="btn-primary-rpg" onclick="GameUI.showScreen('screen-mode')">⚔️ PLAY NOW</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 6. LEADERBOARD SCREEN ==================== -->
+        <section id="screen-leaderboard" class="game-screen">
+            <div class="page-container">
+                <header class="page-header">
+                    <h2>HALL OF LEGENDS</h2>
+                    <p>The greatest cave explorers and AI conquerors in history</p>
+                </header>
+
+                <div class="table-container">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Adventurer</th>
+                                <th>Mode</th>
+                                <th>Difficulty</th>
+                                <th>Score</th>
+                                <th>Time</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-rows">
+                            <!-- Dynamic rows injected here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="page-actions-bar">
+                    <button class="btn-secondary-rpg btn-back-home">‹ RETURN TO MENU</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 7. ACHIEVEMENTS SCREEN ==================== -->
+        <section id="screen-achievements" class="game-screen">
+            <div class="page-container">
+                <header class="page-header">
+                    <h2>EXPEDITION HONORS</h2>
+                    <p id="achievements-progress-text">0 / 10 Unlocked</p>
+                </header>
+
+                <div id="achievements-grid" class="achievements-grid">
+                    <!-- Dynamic cards injected here -->
+                </div>
+
+                <div class="page-actions-bar">
+                    <button class="btn-secondary-rpg btn-back-home">‹ RETURN TO MENU</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 8. SETTINGS SCREEN ==================== -->
+        <section id="screen-settings" class="game-screen">
+            <div class="page-container">
+                <header class="page-header">
+                    <h2>SYSTEM PREFERENCES</h2>
+                    <p>Customize audio synthesizers, graphical fidelity, and AI deliberation speed</p>
+                </header>
+
+                <form class="settings-form" onsubmit="event.preventDefault();">
+                    <div class="setting-row">
+                        <span class="setting-label">Master Volume</span>
+                        <input id="setting-master-vol" type="range" min="0" max="100" value="80"
+                            class="slider-control" />
+                    </div>
+                    <div class="setting-row">
+                        <span class="setting-label">Ambient Cave Drone (Music)</span>
+                        <input id="setting-music-vol" type="range" min="0" max="100" value="50"
+                            class="slider-control" />
+                    </div>
+                    <div class="setting-row">
+                        <span class="setting-label">Sound Effects (SFX)</span>
+                        <input id="setting-sfx-vol" type="range" min="0" max="100" value="85" class="slider-control" />
+                    </div>
+                    <div class="setting-row">
+                        <span class="setting-label">Screen Shake FX</span>
+                        <input id="setting-screenshake" type="checkbox" checked />
+                    </div>
+                    <div class="setting-row">
+                        <span class="setting-label">Particle Density</span>
+                        <select id="setting-particles" class="select-control">
+                            <option value="ultra">Ultra (Embers + Dust + Mist)</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low (Battery Saver)</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <span class="setting-label">AI Deliberation Delay</span>
+                        <div style="display:flex; align-items:center; gap:0.8rem;">
+                            <input id="setting-ai-delay" type="range" min="200" max="1500" step="100" value="600"
+                                class="slider-control" />
+                            <span id="ai-delay-val" style="font-family:var(--font-hud); font-weight:700;">600ms</span>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <button id="btn-reset-data" type="button" class="btn-secondary-rpg"
+                            style="color:var(--danger-red); border-color:var(--danger-dark); margin:0 auto;">
+                            ⚠️ RESET ALL PROGRESS & DATA
+                        </button>
+                    </div>
+                </form>
+
+                <div class="page-actions-bar">
+                    <button class="btn-secondary-rpg btn-back-home">‹ RETURN TO MENU</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 9. VICTORY SCREEN ==================== -->
+        <section id="screen-victory" class="game-screen">
+            <div class="endgame-modal">
+                <span class="game-title-badge">VICTORY TRIUMPHANT</span>
+                <h2 id="victory-winner-title" class="victory-title">You Conquered Wumpus World!</h2>
+                <p id="victory-subtitle" style="color:var(--text-secondary);">You escaped the treacherous dark caverns
+                    with glory and riches.</p>
+                <p id="victory-unlock-banner" class="unlock-banner" style="display:none;"></p>
+
+                <!-- Level Reward Panel (Only ONE reward per completed level) -->
+                <div id="victory-reward-card" class="victory-reward-card" style="display:none;">
+                    <div class="reward-card-header">
+                        <span class="reward-tag-badge">LEVEL <span id="victory-reward-level-num">1</span> REWARD</span>
+                    </div>
+                    <div class="reward-card-content">
+                        <div class="reward-icon-box" id="victory-reward-icon">🏹</div>
+                        <div class="reward-details">
+                            <h4 id="victory-reward-title" class="reward-title">Quiver Expansion</h4>
+                            <p id="victory-reward-desc" class="reward-desc">+1 Starting Arrow in subsequent caverns</p>
+                        </div>
+                        <button id="btn-claim-reward" class="btn-primary-rpg btn-claim-reward">
+                            <span>CLAIM REWARD</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="endgame-stats-grid">
+                    <div class="endgame-stat">
+                        <span class="stat-label">Total Score</span>
+                        <span id="victory-score" class="stat-val highlight-gold">2450</span>
+                    </div>
+                    <div class="endgame-stat">
+                        <span class="stat-label">Expedition Time</span>
+                        <span id="victory-time" class="stat-val">01:34</span>
+                    </div>
+                    <div class="endgame-stat">
+                        <span class="stat-label">Total Moves</span>
+                        <span id="victory-moves" class="stat-val">28</span>
+                    </div>
+                    <div class="endgame-stat">
+                        <span class="stat-label">Arrows Fired</span>
+                        <span id="victory-arrows" class="stat-val">1 used (2 left)</span>
+                    </div>
+                    <div class="endgame-stat">
+                        <span class="stat-label">Gold Status</span>
+                        <span id="victory-gold" class="stat-val highlight-gold">Secured 💰</span>
+                    </div>
+                    <div class="endgame-stat">
+                        <span class="stat-label">Cavern Explored</span>
+                        <span id="victory-explore" class="stat-val">82%</span>
+                    </div>
+                </div>
+
+                <div id="victory-players-summary" style="display:none; margin-bottom: 1.5rem;">
+                    <!-- Multiplayer comparison table injected here -->
+                </div>
+
+                <div class="endgame-actions">
+                    <button id="btn-victory-next" class="btn-primary-rpg" style="display:none;">NEXT LEVEL ▶</button>
+                    <button id="btn-victory-again" class="btn-primary-rpg">PLAY AGAIN ⚔️</button>
+                    <button id="btn-victory-levels" class="btn-secondary-rpg" style="display:none;">LEVEL
+                        SELECT</button>
+                    <button id="btn-victory-menu" class="btn-secondary-rpg">MAIN MENU</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 10. GAME OVER SCREEN ==================== -->
+        <section id="screen-gameover" class="game-screen">
+            <div class="endgame-modal">
+                <span class="game-title-badge"
+                    style="border-color:var(--danger-red); color:var(--danger-red);">EXPEDITION TERMINATED</span>
+                <h2 class="gameover-title">GAME OVER</h2>
+                <p id="gameover-reason" style="color:var(--danger-red); font-size:1.1rem; margin-bottom:1rem;">
+                    The Wumpus attacked you from the shadows!
+                </p>
+
+                <div class="endgame-stats-grid">
+                    <div class="endgame-stat">
+                        <span class="stat-label">Final Score</span>
+                        <span id="gameover-score" class="stat-val">-1500</span>
+                    </div>
+                    <div class="endgame-stat">
+                        <span class="stat-label">Survival Time</span>
+                        <span id="gameover-time" class="stat-val">00:45</span>
+                    </div>
+                    <div class="endgame-stat">
+                        <span class="stat-label">Moves Attempted</span>
+                        <span id="gameover-moves" class="stat-val">14</span>
+                    </div>
+                    <div class="endgame-stat">
+                        <span class="stat-label">Tip</span>
+                        <span class="stat-val" style="font-size:0.95rem; color:var(--text-secondary);">Watch for Breeze
+                            and Stench cues!</span>
+                    </div>
+                </div>
+
+                <div class="endgame-actions">
+                    <button id="btn-gameover-retry" class="btn-primary-rpg">TRY AGAIN ⚔️</button>
+                    <button id="btn-gameover-menu" class="btn-secondary-rpg">MAIN MENU</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Pause Modal -->
+    <div id="modal-pause" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title">EXPEDITION PAUSED</h3>
+            <div class="modal-btn-list">
+                <button id="btn-pause-resume" class="btn-primary-rpg">RESUME EXPEDITION</button>
+                <button id="btn-pause-restart" class="btn-secondary-rpg">RESTART CAVERN</button>
+                <button id="btn-pause-how-to-play" class="btn-secondary-rpg">HOW TO PLAY</button>
+                <button id="btn-pause-abandon" class="btn-secondary-rpg" style="color:var(--danger-red);">ABANDON TO
+                    MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aiming Direction Modal -->
+    <div id="modal-aiming" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title">SELECT ARROW DIRECTION</h3>
+            <p style="color:var(--text-secondary); font-size:0.95rem;">
+                Choose which orthogonal direction to fire your arrow.
+            </p>
+            <div class="aiming-grid">
+                <button class="aim-dir-btn aim-up" data-dir="UP" title="Fire North">▲</button>
+                <button class="aim-dir-btn aim-left" data-dir="LEFT" title="Fire West">◀</button>
+                <button class="aim-dir-btn aim-down" data-dir="DOWN" title="Fire South">▼</button>
+                <button class="aim-dir-btn aim-right" data-dir="RIGHT" title="Fire East">▶</button>
+            </div>
+            <button id="btn-aim-cancel" class="btn-secondary-rpg" style="margin: 0 auto;">CANCEL AIM</button>
+        </div>
+    </div>
+
+    <!-- Credits Modal -->
+    <div id="modal-credits" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title">EXPEDITION CREDITS</h3>
+            <p style="color:var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">
+                <strong>WUMPUS WORLD: HUNT FOR THE TREASURE</strong><br>
+                Based on the classic artificial intelligence problem formulated by Gregory Yob, Stuart Russell, and
+                Peter Norvig.<br><br>
+                Built with modern Web Audio synthesis, intelligent propositional reasoning AI, canvas particle
+                simulation, and AAA dark fantasy visual design.
+            </p>
+            <button class="btn-primary-rpg modal-close" style="margin: 0 auto;">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="js/engine/storage.js"></script>
+    <script src="js/engine/audio.js"></script>
+    <script src="js/engine/particles.js"></script>
+    <script src="js/engine/levels.js"></script>
+    <script src="js/engine/board.js"></script>
+    <script src="js/ai/ai.js"></script>
+    <script src="js/engine/game.js"></script>
+    <script src="js/ui/ui.js"></script>
+
+    <script>
+        // Initialize particle canvas and audio unlock on first user gesture
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.GameParticles) {
+                window.GameParticles.init('ambientCanvas');
+            }
+
+            const unlockAudio = () => {
+                if (window.GameAudio) {
+                    window.GameAudio.resumeContext();
+                }
+                window.removeEventListener('click', unlockAudio);
+                window.removeEventListener('keydown', unlockAudio);
+                window.removeEventListener('touchstart', unlockAudio);
+            };
+
+            window.addEventListener('click', unlockAudio);
+            window.addEventListener('keydown', unlockAudio);
+            window.addEventListener('touchstart', unlockAudio);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "wumpus-world-adventure",
+  "version": "1.0.0",
+  "description": "WUMPUS WORLD: HUNT FOR THE TREASURE - A AAA dark fantasy browser strategy adventure game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'Build complete'",
+    "test": "node test_game_engine.js"
+  },
+  "keywords": [
+    "wumpus-world",
+    "game",
+    "ai",
+    "knowledge-base",
+    "adventure",
+    "strategy"
+  ],
+  "author": "Antigravity AI",
+  "license": "MIT"
+}
